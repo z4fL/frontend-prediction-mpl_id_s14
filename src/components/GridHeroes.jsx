@@ -1,11 +1,13 @@
 import React from "react";
 
-const GridHeroes = ({heroes}) => {
+const GridHeroes = ({heroes, pick}) => {
+  const sortedHeroes = heroes.sort((a, b) => a.name.localeCompare(b.name));
+  
   return (
-    <div className="grid grid-cols-6 gap-6 place-items-center text-center font-league-gothic text-2xl overflow-y-scroll no-scrollbar">
-      {heroes.map((value) => (
-        <div>
-          <img src={`${value.icon}`} className="w-16 h-16 cursor-pointer" />
+    <div className="grid grid-cols-6 gap-6 place-items-center h-[23rem] font-league-gothic text-2xl overflow-y-scroll no-scrollbar">
+      {sortedHeroes.map((value) => (
+        <div key={value.name} className="flex flex-col items-center">
+          <img src={`${value.icon}`} className="w-16 h-16 cursor-pointer" onClick={() => pick(value.name)} />
           <div className="">{value.name}</div>
         </div>
       ))}
