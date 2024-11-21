@@ -3,13 +3,32 @@ import GridHeroes from "./components/GridHeroes";
 import RoleSection from "./components/RoleSection";
 import TeamSection from "./components/TeamSection";
 import MidSection from "./components/MidSection";
-import heroes from "./data/heroes";
+import useFetch from "./utility/useFetch";
+import Loading from "./components/Loading";
 
 export default function App() {
   const [datapick, setDatapick] = useState({ blue: [], red: [] });
   const [activeRole, setActiveRole] = useState("");
-  const [filteredHeroes, setFilteredHeroes] = useState(heroes);
+  const [filteredHeroes, setFilteredHeroes] = useState([]);
   const [result, setResult] = useState("");
+
+  const api = import.meta.env.VITE_API_URL;
+
+  const { data: heroes, loading: loadingHero } = useFetch(api + "/heroes");
+  const { data: positions, loading: loadingPosition } = useFetch(
+    api + "/positions"
+  );
+
+  const isLoading = loadingHero || loadingPosition;
+
+  useEffect(() => {
+    if (!heroes) return;
+
+    const filtered = activeRole
+      ? heroes.filter((hero) => hero.role.includes(activeRole))
+      : heroes;
+    setFilteredHeroes(filtered);
+  }, [activeRole, heroes]);
 
   const onclickHeroIcon = (name) => {
     setDatapick((prevDatapick) => {
@@ -65,33 +84,39 @@ export default function App() {
     });
   };
 
-  useEffect(() => {
-    const filtered = activeRole
-      ? heroes.filter((hero) => hero.role.includes(activeRole))
-      : heroes;
-    setFilteredHeroes(filtered);
-  }, [activeRole]);
-
   const predict = async () => {
-    if (
-      datapick.blue.length === 5 &&
-      datapick.red.length === 5 &&
-      !datapick.blue.includes(null) &&
-      !datapick.red.includes(null)
-    ) {
-
-      const simulatePrediction = async () => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve("BLUE".toLowerCase());
-          }, 2000);
+    try {
+      if (
+        datapick.blue.length === 5 &&
+        datapick.red.length === 5 &&
+        !datapick.blue.includes(null) &&
+        !datapick.red.includes(null)
+      ) {
+        const jsonData = JSON.stringify([...datapick.blue, ...datapick.red]);
+        const response = await fetch(`${api}/data-pick`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: jsonData,
         });
-      };
+        if (!response.ok) {
+          console.error(`HTTP error! status: ${response.status}`);
+          return;
+        }
+        const res = await response.json();
+        const rs = res.prediction.toLocaleLowerCase();
 
-      const res = await simulatePrediction();
-      setResult(res);
+        setResult(rs);
+      }
+    } catch (error) {
+      console.error("Prediction failed:", error);
     }
   };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <div className="flex justify-center min-h-screen bg-slate-950">
@@ -104,19 +129,23 @@ export default function App() {
             <TeamSection
               side={"blue"}
               color={"bg-[#39B5FF]"}
-              heroes={datapick.blue}
+              pickedHeroes={datapick.blue}
               removeHero={removeHero}
               win={result}
+              positions={positions}
+              heroes={heroes}
             />
             <TeamSection
               side={"red"}
               color={"bg-[#FF5958]"}
-              heroes={datapick.red}
+              pickedHeroes={datapick.red}
               removeHero={removeHero}
               win={result}
+              positions={positions}
+              heroes={heroes}
             />
           </div>
-          <MidSection predict={predict} result={result} setResult={setResult} />
+          <MidSection predict={predict} result={result} setResult={setResult} setDatapick={setDatapick} />
         </div>
         <div className="relative w-full max-w-4xl mx-auto py-3">
           <RoleSection active={activeRole} setActive={setActiveRole} />

@@ -1,8 +1,7 @@
 import React from "react";
-import positions from "../data/positions";
-import dataHero from "../data/heroes";
 
-const TeamSection = ({ color, heroes, side, removeHero, win }) => {
+const TeamSection = ({ color, pickedHeroes, side, removeHero, win, positions, heroes }) => {
+  const api = import.meta.env.VITE_BASE_API;
   return (
     <div
       className={`${side === win || win === "" ? color : "bg-gray-700"}`}
@@ -14,8 +13,8 @@ const TeamSection = ({ color, heroes, side, removeHero, win }) => {
         }`}
       >
         {positions.map((value, index) => {
-          const hero = heroes[index];
-          const heroData = hero ? dataHero.find((h) => h.name === hero) : null;
+          const hero = pickedHeroes[index];
+          const heroData = hero ? heroes.find((h) => h.name === hero) : null;
 
           return (
             <div
@@ -25,9 +24,9 @@ const TeamSection = ({ color, heroes, side, removeHero, win }) => {
             >
               <div className="w-full h-[187px] bg-gray-900 flex justify-center items-center">
                 {heroData ? (
-                  <img src={`${heroData.portrait}`} className="w-full h-auto" />
+                  <img src={`${api+heroData.portrait}`} className="w-full h-auto" />
                 ) : (
-                  <img src={`${value.icon}`} className="w-8 h-8" />
+                  <img src={`${api+value.icon}`} className="w-8 h-8" />
                 )}
               </div>
               <div className={`py-2 ${side === win || win === "" ? "text-slate-950" : "text-slate-300"}`}>
