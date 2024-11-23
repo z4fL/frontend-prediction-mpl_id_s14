@@ -1,7 +1,7 @@
 import React from "react";
 
 const GridHeroes = ({ heroes, pick }) => {
-  const api = import.meta.env.VITE_BASE_API;
+  const api = import.meta.env.VITE_BASE_URL;
 
   const sortedHeroes = heroes.sort((a, b) => a.name.localeCompare(b.name));
 

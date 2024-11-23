@@ -1,7 +1,7 @@
 import React from "react";
 
 const TeamSection = ({ color, pickedHeroes, side, removeHero, win, positions, heroes }) => {
-  const api = import.meta.env.VITE_BASE_API;
+  const api = import.meta.env.VITE_BASE_URL;
   return (
     <div
       className={`${side === win || win === "" ? color : "bg-gray-700"}`}
